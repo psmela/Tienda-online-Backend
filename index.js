@@ -1,9 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const productoRoutes = require('./routes/productoRoutes');
+const cors = require('cors'); // Importa el paquete cors
 require('dotenv').config(); // Cargar las variables de entorno
 
 const app = express();
+
+
+app.use(cors()); 
 
 // Middleware para parsear el cuerpo de la solicitud
 app.use(express.json()); // Esto ya es suficiente para procesar JSON
