@@ -1,24 +1,27 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const productoRoutes = require('./routes/productoRoutes');
+require('dotenv').config(); // Cargar las variables de entorno
+
 const app = express();
-const port = 3000;
-const conexion = require("./conexion.js");
-const productoRoutes = require('./routes/productoRoutes.js');
 
-app.use(express.json()); // Para que el servidor pueda manejar JSON en solicitudes POST
+// Middleware para parsear el cuerpo de la solicitud
+app.use(express.json()); // Esto ya es suficiente para procesar JSON
 
-// Aquí está la ruta de los productos
-app.use(productoRoutes);
+// Construir la URI de conexión a MongoDB Atlas
+const dbURI = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@cluster0.6ztjp.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority&appName=Cluster0`;
 
-async function main() {
-  try {
-    await conexion;
-    console.log("Conexión a MongoDB exitosa");
-    app.listen(port, () => {
-      console.log("Servidor escuchando en el puerto:", port);
-    });
-  } catch (error) {
-    console.log(error.message);
-  }
-}
+// Conectar a MongoDB Atlas
+mongoose.connect(dbURI)
+  .then(() => console.log('Conectado a MongoDB Atlas'))
+  .catch(err => console.error('Error conectando a la base de datos:', err));
 
-main();
+// Usar las rutas de productos
+app.use('/api/productos', productoRoutes);
+
+// Puerto
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en puerto ${PORT}`);
+});

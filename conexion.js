@@ -1,12 +1,10 @@
-const mongoose = require("mongoose");
-require("dotenv").config();
+require('dotenv').config(); // Cargar las variables de entorno desde .env
+const mongoose = require('mongoose');
 
-const url = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@cluster0.6ztjp.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority`;
+// Construir la URI usando las variables del archivo .env
+const dbURI = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@cluster0.6ztjp.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority&appName=Cluster0`;
 
-mongoose.connect(url)
-  .then(() => {
-    console.log("Conexión a MongoDB exitosa");
-  })
-  .catch(err => {
-    console.error("Error de conexión a MongoDB:", err);
-  });
+// Conectar a MongoDB sin las opciones obsoletas
+mongoose.connect(dbURI)
+  .then(() => console.log('Conectado a MongoDB'))
+  .catch(err => console.error('Error conectando a la base de datos:', err));
