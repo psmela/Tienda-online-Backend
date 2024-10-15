@@ -13,8 +13,15 @@ const obtenerProductos = async (req, res) => {
 
 // Controlador para crear un producto
 const crearProducto = async (req, res) => {
+    const {nombre, categoria, descripcion, precio, stock} = req.body
     try {
-        const nuevoProducto = new Producto(req.body); // Crea una nueva instancia del modelo
+        const nuevoProducto = new Producto({
+            nombre,
+            precio,
+            categoria,
+            stock,
+            descripcion
+        }); // Crea una nueva instancia del modelo
         await nuevoProducto.save(); // Guarda el producto en la base de datos
         res.status(201).json({ message: "Producto creado", producto: nuevoProducto }); // Respuesta exitosa
     } catch (error) {
