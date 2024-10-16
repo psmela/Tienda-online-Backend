@@ -14,3 +14,13 @@ router.put('/:id', actualizarProducto); // Ruta para actualizar un producto exis
 router.delete('/:id', eliminarProducto); // Ruta para eliminar un producto
 
 module.exports = router;
+
+// para Cloudinary
+const { subirImagen } = require('../controllers/productosController'); // Controlador para manejar la subida
+const upload = require('../middlewares/multerConfig'); // Importar Multer
+
+// Ruta para subir imágenes de productos
+router.post('/subir-imagen', upload.single('imagen'), subirImagen);
+
+module.exports = router;
+

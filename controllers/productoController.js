@@ -1,4 +1,4 @@
-const Producto = require('../models/producto'); // Asegúrate de que la ruta al modelo sea correcta
+const Producto = require('../models/producto'); 
 
 // Controlador para obtener todos los productos
 const obtenerProductos = async (req, res) => {
@@ -66,5 +66,30 @@ module.exports = {
     actualizarProducto,
     eliminarProducto
 }; // Exporta los controladores para usarlos en otras partes de la aplicación
+
+//Función para subir imágenes a Cloudinary
+const cloudinary = require('../conexion'); 
+
+// Subir imagen a Cloudinary
+const subirImagen = async (req, res) => {
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'productos_tienda', // Puedes especificar la carpeta en Cloudinary
+    });
+
+    // El resultado contiene información sobre la imagen subida
+    console.log(result);
+
+    // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
+    res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al subir la imagen', error });
+  }
+};
+
+module.exports = { subirImagen };
+
+
+
 
 
