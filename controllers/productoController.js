@@ -60,13 +60,6 @@ const eliminarProducto = async (req, res) => {
     }
 };
 
-module.exports = {
-    obtenerProductos,
-    crearProducto,
-    actualizarProducto,
-    eliminarProducto
-}; // Exporta los controladores para usarlos en otras partes de la aplicación
-
 //Función para subir imágenes a Cloudinary
 const cloudinary = require('../conexion'); 
 
@@ -74,7 +67,7 @@ const cloudinary = require('../conexion');
 const subirImagen = async (req, res) => {
   try {
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'productos_tienda', // Puedes especificar la carpeta en Cloudinary
+      folder: 'tiendaOnline', // carpeta creada en Cloudinary
     });
 
     // El resultado contiene información sobre la imagen subida
@@ -87,7 +80,14 @@ const subirImagen = async (req, res) => {
   }
 };
 
-module.exports = { subirImagen };
+module.exports = {
+    subirImagen,
+    obtenerProductos,
+    crearProducto,
+    actualizarProducto,
+    eliminarProducto
+}; // Exporta los controladores para usarlos en otras partes de la aplicación
+
 
 
 
