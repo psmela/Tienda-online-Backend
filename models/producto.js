@@ -20,6 +20,10 @@ const productoSchema = new mongoose.Schema({
     descripcion: { 
         type: String, 
         required: true 
+    },
+    carrito: { 
+        type: Boolean, 
+        default: false // Atributo 'carrito' con valor predeterminado false
     }
 }, { timestamps: true }); // Agrega timestamps para registrar automáticamente la creación y actualización
 

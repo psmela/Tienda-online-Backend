@@ -23,7 +23,7 @@ const crearProducto = async (req, res) => {
     }
 };
 
-// Controlador para actualizar un producto
+// Controlador para actualizar un producto, incluyendo el campo 'carrito'
 const actualizarProducto = async (req, res) => {
     const { id } = req.params; // Obtenemos el ID del producto de los parámetros de la URL
     try {
@@ -59,5 +59,3 @@ module.exports = {
     actualizarProducto,
     eliminarProducto
 }; // Exporta los controladores para usarlos en otras partes de la aplicación
-
-
