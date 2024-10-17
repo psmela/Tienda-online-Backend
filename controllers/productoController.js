@@ -1,5 +1,12 @@
 const Producto = require('../models/producto'); 
 
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+
 // Controlador para obtener todos los productos
 const obtenerProductos = async (req, res) => {
     try {
@@ -26,12 +33,22 @@ const obtenerProducto = async (req, res) => {
 const crearProducto = async (req, res) => {
     const {nombre, categoria, descripcion, precio, stock} = req.body
     try {
+        let imagenes = [];
+
+        // Subir cada imagen a Cloudinary y almacenar la URL en el array 'imagenes'
+        for (let i = 0; i < req.files.length; i++) {
+            const result = await cloudinary.uploader.upload(req.files[i].path, {
+                folder: 'productos_tienda', // Carpeta en Cloudinary
+            });
+            imagenes.push(result.secure_url); // Añadir la URL de la imagen al array
+        }
         const nuevoProducto = new Producto({
             nombre,
             precio,
             categoria,
             stock,
-            descripcion
+            descripcion,
+            imagenes
         }); // Crea una nueva instancia del modelo
         await nuevoProducto.save(); // Guarda el producto en la base de datos
         res.status(201).json({ message: "Producto creado", producto: nuevoProducto }); // Respuesta exitosa
