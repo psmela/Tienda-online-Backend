@@ -11,6 +11,17 @@ const obtenerProductos = async (req, res) => {
     }
 };
 
+const obtenerProducto = async (req, res) => {
+    const id = req.params.id
+    try {
+        const producto = await Producto.findById(id)
+        res.status(200).json(producto)
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({ message: "Error obteniendo productos" });
+    }
+}
+
 // Controlador para crear un producto
 const crearProducto = async (req, res) => {
     const {nombre, categoria, descripcion, precio, stock} = req.body
@@ -83,6 +94,7 @@ const subirImagen = async (req, res) => {
 module.exports = {
     subirImagen,
     obtenerProductos,
+    obtenerProducto,
     crearProducto,
     actualizarProducto,
     eliminarProducto
