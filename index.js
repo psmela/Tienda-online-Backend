@@ -10,7 +10,7 @@ const app = express();
 app.use(cors()); 
 
 // Middleware para parsear el cuerpo de la solicitud
-app.use(express.json()); // Esto ya es suficiente para procesar JSON
+app.use(express.json()); 
 
 // Construir la URI de conexión a MongoDB Atlas
 const dbURI = `mongodb+srv://${process.env.DBUSER}:${process.env.DBPASS}@cluster0.6ztjp.mongodb.net/${process.env.DBNAME}?retryWrites=true&w=majority&appName=Cluster0`;

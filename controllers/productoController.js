@@ -1,25 +1,49 @@
 const Producto = require('../models/producto'); 
 
-// Controlador para obtener todos los productos
+// Controlador para obtener productos con filtros de categoría y precio
 const obtenerProductos = async (req, res) => {
     try {
-        const productos = await Producto.find(); // Busca todos los productos
-        res.status(200).json(productos); // Responde con la lista de productos
+        const { categoria, precioMin, precioMax } = req.query; // Obtener los parámetros de la solicitud (query)
+
+        // Crear el objeto de filtros
+        let filtros = {};
+
+        // Si se ha enviado una categoría, añadirla al filtro
+        if (categoria) {
+            filtros.categoria = categoria;
+        }
+
+        // Si se ha enviado un precio mínimo, añadirlo al filtro
+        if (precioMin) {
+            filtros.precio = { ...filtros.precio, $gte: parseFloat(precioMin) }; // $gte es "mayor o igual"
+        }
+
+        // Si se ha enviado un precio máximo, añadirlo al filtro
+        if (precioMax) {
+            filtros.precio = { ...filtros.precio, $lte: parseFloat(precioMax) }; // $lte es "menor o igual"
+        }
+
+        // Buscar productos que coincidan con los filtros
+        const productos = await Producto.find(filtros);
+
+        // Responder con la lista de productos filtrados
+        res.status(200).json(productos);
     } catch (error) {
-        console.error(error); // Muestra el error en la consola
-        res.status(500).json({ message: "Error obteniendo productos" }); // Respuesta de error
+        console.error(error);
+        res.status(500).json({ message: "Error obteniendo productos" });
     }
 };
 
 // Controlador para crear un producto
 const crearProducto = async (req, res) => {
-    const {nombre, categoria, descripcion, precio, stock} = req.body
+    const {nombre, categoria, descripcion, precio, stock} = req.body;
     try {
         const nuevoProducto = new Producto({
             nombre,
             precio,
             categoria,
             stock,
+            carrito,
             descripcion
         }); // Crea una nueva instancia del modelo
         await nuevoProducto.save(); // Guarda el producto en la base de datos
@@ -56,7 +80,7 @@ const eliminarProducto = async (req, res) => {
         res.status(200).json({ message: "Producto eliminado", producto: productoEliminado }); // Respuesta exitosa
     } catch (error) {
         console.error("Error de base de datos:", error); // Log para errores específicos
-        res.status(500).json({ message: "Error eliminando producto" }); // Respuesta de error
+        res.status(500).json({ message: "Error eliminando producto" }); 
     }
 };
 
@@ -65,19 +89,19 @@ const cloudinary = require('../conexion');
 
 // Subir imagen a Cloudinary
 const subirImagen = async (req, res) => {
-  try {
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'tiendaOnline', // carpeta creada en Cloudinary
-    });
+    try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'tiendaOnline', // carpeta creada en Cloudinary
+        });
 
-    // El resultado contiene información sobre la imagen subida
-    console.log(result);
+        // El resultado contiene información sobre la imagen subida
+        console.log(result);
 
-    // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
-    res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al subir la imagen', error });
-  }
+        // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
+        res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al subir la imagen', error });
+    }
 };
 
 module.exports = {
@@ -86,7 +110,8 @@ module.exports = {
     crearProducto,
     actualizarProducto,
     eliminarProducto
-}; // Exporta los controladores para usarlos en otras partes de la aplicación
+};
+
 
 
 
