@@ -1,10 +1,5 @@
 const Producto = require('../models/producto'); 
-
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const cloudinary = require('../middlewares/cloudinary.js')
 
 
 // Controlador para obtener todos los productos
@@ -31,33 +26,44 @@ const obtenerProducto = async (req, res) => {
 
 // Controlador para crear un producto
 const crearProducto = async (req, res) => {
-    const {nombre, categoria, descripcion, precio, stock} = req.body
+    const {nombre, categoria, descripcion, precio, stock } = req.body;
+
     try {
         let imagenes = [];
 
-        // Subir cada imagen a Cloudinary y almacenar la URL en el array 'imagenes'
-        for (let i = 0; i < req.files.length; i++) {
-            const result = await cloudinary.uploader.upload(req.files[i].path, {
-                folder: 'productos_tienda', // Carpeta en Cloudinary
-            });
-            imagenes.push(result.secure_url); // Añadir la URL de la imagen al array
+        // Verificar si hay archivos adjuntos
+        if (req.files && req.files.length > 0) {
+            // Subir cada imagen a Cloudinary
+            for (let i = 0; i < req.files.length; i++) {
+                try {
+                    const result = await cloudinary.uploader.upload(req.files[i].path, {
+                        folder: 'productos_tienda',
+                    });
+                    imagenes.push(result.secure_url); // Guardar la URL segura de la imagen subida a Cloudinary
+                } catch (uploadError) {
+                    console.error(`Error subiendo imagen ${i + 1}:`, uploadError);
+                    return res.status(500).json({ message: "Error subiendo imágenes" });
+                }
+            }
         }
+
+        // Crear el nuevo producto con las URLs de las imágenes
         const nuevoProducto = new Producto({
             nombre,
             precio,
             categoria,
             stock,
             descripcion,
-            imagenes
-        }); // Crea una nueva instancia del modelo
-        await nuevoProducto.save(); // Guarda el producto en la base de datos
-        res.status(201).json({ message: "Producto creado", producto: nuevoProducto }); // Respuesta exitosa
+            imagenes, // Guardar las URLs de las imágenes en el campo 'imagenes'
+        });
+
+        await nuevoProducto.save(); // Guardar el producto en la base de datos
+        res.status(201).json({ message: "Producto creado", producto: nuevoProducto });
     } catch (error) {
-        console.error("Error de base de datos:", error); // Log para errores específicos
-        res.status(500).json({ message: "Error creando producto" }); // Respuesta de error
+        console.error("Error de base de datos:", error);
+        res.status(500).json({ message: "Error creando producto" });
     }
 };
-
 // Controlador para actualizar un producto, incluyendo el campo 'carrito'
 const actualizarProducto = async (req, res) => {
     const { id } = req.params; // Obtenemos el ID del producto de los parámetros de la URL
@@ -89,7 +95,7 @@ const eliminarProducto = async (req, res) => {
 };
 
 //Función para subir imágenes a Cloudinary
-const cloudinary = require('../conexion'); 
+/*const cloudinary = require('../conexion'); 
 
 // Subir imagen a Cloudinary
 const subirImagen = async (req, res) => {
@@ -106,10 +112,10 @@ const subirImagen = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error al subir la imagen', error });
   }
-};
+};*/
 
 module.exports = {
-    subirImagen,
+   // subirImagen,
     obtenerProductos,
     obtenerProducto,
     crearProducto,
