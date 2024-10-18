@@ -14,6 +14,15 @@ const ProductoSchema = new mongoose.Schema({
     },
     descripcion: {
         type: String,
+        required: true
+    },
+    stock: {
+        type: Number,
+        required: true
+    },
+    carrito: {
+        type: Boolean,
+        default: false
     },
     imagenes: [{
         type: String, // Array para almacenar múltiples URLs de imágenes
