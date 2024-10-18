@@ -1,4 +1,6 @@
 const Producto = require('../models/producto'); 
+const cloudinary = require('../middlewares/cloudinary.js')
+
 
 // Controlador para obtener productos con filtros de categoría y precio
 const obtenerProductos = async (req, res) => {
@@ -34,26 +36,57 @@ const obtenerProductos = async (req, res) => {
     }
 };
 
+const obtenerProducto = async (req, res) => {
+    const id = req.params.id
+    try {
+        const producto = await Producto.findById(id)
+        res.status(200).json(producto)
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({ message: "Error obteniendo productos" });
+    }
+}
+
 // Controlador para crear un producto
 const crearProducto = async (req, res) => {
-    const {nombre, categoria, descripcion, precio, stock} = req.body;
+    const {nombre, categoria, descripcion, precio, stock } = req.body;
+
     try {
+        let imagenes = [];
+
+        // Verificar si hay archivos adjuntos
+        if (req.files && req.files.length > 0) {
+            // Subir cada imagen a Cloudinary
+            for (let i = 0; i < req.files.length; i++) {
+                try {
+                    const result = await cloudinary.uploader.upload(req.files[i].path, {
+                        folder: 'productos_tienda',
+                    });
+                    imagenes.push(result.secure_url); // Guardar la URL segura de la imagen subida a Cloudinary
+                } catch (uploadError) {
+                    console.error(`Error subiendo imagen ${i + 1}:`, uploadError);
+                    return res.status(500).json({ message: "Error subiendo imágenes" });
+                }
+            }
+        }
+
+        // Crear el nuevo producto con las URLs de las imágenes
         const nuevoProducto = new Producto({
             nombre,
             precio,
             categoria,
             stock,
-            carrito,
-            descripcion
-        }); // Crea una nueva instancia del modelo
-        await nuevoProducto.save(); // Guarda el producto en la base de datos
-        res.status(201).json({ message: "Producto creado", producto: nuevoProducto }); // Respuesta exitosa
+            descripcion,
+            imagenes, // Guardar las URLs de las imágenes en el campo 'imagenes'
+        });
+
+        await nuevoProducto.save(); // Guardar el producto en la base de datos
+        res.status(201).json({ message: "Producto creado", producto: nuevoProducto });
     } catch (error) {
-        console.error("Error de base de datos:", error); // Log para errores específicos
-        res.status(500).json({ message: "Error creando producto" }); // Respuesta de error
+        console.error("Error de base de datos:", error);
+        res.status(500).json({ message: "Error creando producto" });
     }
 };
-
 // Controlador para actualizar un producto, incluyendo el campo 'carrito'
 const actualizarProducto = async (req, res) => {
     const { id } = req.params; // Obtenemos el ID del producto de los parámetros de la URL
@@ -85,7 +118,7 @@ const eliminarProducto = async (req, res) => {
 };
 
 //Función para subir imágenes a Cloudinary
-const cloudinary = require('../conexion'); 
+/*const cloudinary = require('../conexion'); 
 
 // Subir imagen a Cloudinary
 const subirImagen = async (req, res) => {
@@ -97,16 +130,17 @@ const subirImagen = async (req, res) => {
         // El resultado contiene información sobre la imagen subida
         console.log(result);
 
-        // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
-        res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
-    } catch (error) {
-        res.status(500).json({ message: 'Error al subir la imagen', error });
-    }
-};
+    // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
+    res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al subir la imagen', error });
+  }
+};*/
 
 module.exports = {
-    subirImagen,
+   // subirImagen,
     obtenerProductos,
+    obtenerProducto,
     crearProducto,
     actualizarProducto,
     eliminarProducto
