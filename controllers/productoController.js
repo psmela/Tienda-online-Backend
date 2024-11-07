@@ -1,4 +1,5 @@
 const Producto = require('../models/producto'); 
+const fs = require('fs');
 const cloudinary = require('../middlewares/cloudinary.js')
 
 
@@ -59,9 +60,7 @@ const crearProducto = async (req, res) => {
             // Subir cada imagen a Cloudinary
             for (let i = 0; i < req.files.length; i++) {
                 try {
-                    const result = await cloudinary.uploader.upload(req.files[i].path, {
-                        folder: 'productos_tienda',
-                    });
+                    const result = await cloudinary.uploader.upload(req.files[i].path);
                     imagenes.push(result.secure_url); // Guardar la URL segura de la imagen subida a Cloudinary
                 } catch (uploadError) {
                     console.error(`Error subiendo imagen ${i + 1}:`, uploadError);
@@ -79,7 +78,9 @@ const crearProducto = async (req, res) => {
             descripcion,
             imagenes, // Guardar las URLs de las imágenes en el campo 'imagenes'
         });
-
+        for(let i = 0; i < req.files.length; i++ ){
+            fs.unlinkSync(req.files[i].path);
+        }
         await nuevoProducto.save(); // Guardar el producto en la base de datos
         res.status(201).json({ message: "Producto creado", producto: nuevoProducto });
     } catch (error) {
