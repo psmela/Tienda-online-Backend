@@ -1,29 +1,23 @@
 const Producto = require('../models/producto'); 
 const fs = require('fs');
-const cloudinary = require('../middlewares/cloudinary.js')
+const cloudinary = require('../middlewares/cloudinary.js');
+const { log } = require('console');
 
 
 // Controlador para obtener productos con filtros de categoría y precio
 const obtenerProductos = async (req, res) => {
     try {
-        const { categoria, precioMin, precioMax } = req.query; // Obtener los parámetros de la solicitud (query)
-
-        // Crear el objeto de filtros
+        const { categoria, precioMin, precioMax } = req.query;
         let filtros = {};
 
-        // Si se ha enviado una categoría, añadirla al filtro
         if (categoria) {
             filtros.categoria = categoria;
         }
 
-        // Si se ha enviado un precio mínimo, añadirlo al filtro
-        if (precioMin) {
-            filtros.precio = { ...filtros.precio, $gte: parseFloat(precioMin) }; // $gte es "mayor o igual"
-        }
-
-        // Si se ha enviado un precio máximo, añadirlo al filtro
-        if (precioMax) {
-            filtros.precio = { ...filtros.precio, $lte: parseFloat(precioMax) }; // $lte es "menor o igual"
+        if (precioMin || precioMax) {
+            filtros.precio = {};
+            if (precioMin) filtros.precio.$gte = parseFloat(precioMin);
+            if (precioMax) filtros.precio.$lte = parseFloat(precioMax);
         }
 
         // Buscar productos que coincidan con los filtros
