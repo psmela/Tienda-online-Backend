@@ -54,8 +54,8 @@ const crearProducto = async (req, res) => {
             // Subir cada imagen a Cloudinary
             for (let i = 0; i < req.files.length; i++) {
                 try {
-                    const result = await cloudinary.uploader.upload(req.files[i].path);
-                    imagenes.push(result.secure_url); // Guardar la URL segura de la imagen subida a Cloudinary
+                    const result = await cloudinary.uploader.upload(req.files[i].path, {folder: 'productos_tienda'});
+                    imagenes.push(result.public_id); // Guardar la URL segura de la imagen subida a Cloudinary
                 } catch (uploadError) {
                     console.error(`Error subiendo imagen ${i + 1}:`, uploadError);
                     return res.status(500).json({ message: "Error subiendo imágenes" });
@@ -76,6 +76,7 @@ const crearProducto = async (req, res) => {
             fs.unlinkSync(req.files[i].path);
         }
         await nuevoProducto.save(); // Guardar el producto en la base de datos
+        console.log("producto creado")
         res.status(201).json({ message: "Producto creado", producto: nuevoProducto });
     } catch (error) {
         console.error("Error de base de datos:", error);
@@ -101,10 +102,24 @@ const actualizarProducto = async (req, res) => {
 const eliminarProducto = async (req, res) => {
     const { id } = req.params; // Obtenemos el ID del producto de los parámetros de la URL
     try {
-        const productoEliminado = await Producto.findByIdAndDelete(id); // Elimina el producto
+        const productoEliminado = await Producto.findById(id); 
         if (!productoEliminado) {
             return res.status(404).json({ message: "Producto no encontrado" }); // Si no se encuentra el producto
         }
+    const imagenes = productoEliminado.imagenes; // Suponiendo que almacenas un array de `public_id`
+
+    if (imagenes && imagenes.length > 0) {
+      for (const publicId of imagenes) {
+        try {
+          await cloudinary.uploader.destroy(publicId); // Eliminar cada imagen por `public_id`
+          console.log(`Imagen con ID ${publicId} eliminada de Cloudinary`);
+        } catch (error) {
+          console.error(`Error al eliminar imagen con ID ${publicId}:`, error.message);
+        }
+      }
+    }
+        await productoEliminado.deleteOne()
+        console.log("producto eliminado");
         res.status(200).json({ message: "Producto eliminado", producto: productoEliminado }); // Respuesta exitosa
     } catch (error) {
         console.error("Error de base de datos:", error); // Log para errores específicos
@@ -112,28 +127,9 @@ const eliminarProducto = async (req, res) => {
     }
 };
 
-//Función para subir imágenes a Cloudinary
-/*const cloudinary = require('../conexion'); 
 
-// Subir imagen a Cloudinary
-const subirImagen = async (req, res) => {
-    try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'tiendaOnline', // carpeta creada en Cloudinary
-        });
-
-        // El resultado contiene información sobre la imagen subida
-        console.log(result);
-
-    // Guarda la URL de la imagen en tu base de datos o úsala según sea necesario
-    res.json({ message: 'Imagen subida correctamente', url: result.secure_url });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al subir la imagen', error });
-  }
-};*/
 
 module.exports = {
-   // subirImagen,
     obtenerProductos,
     obtenerProducto,
     crearProducto,

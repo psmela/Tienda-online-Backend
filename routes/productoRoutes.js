@@ -3,7 +3,6 @@ const router = express.Router();
 // para Cloudinary
 const upload = require('../middlewares/multerConfig'); // Importar Multer
 const {
-    //subirImagen,
     obtenerProductos,
     obtenerProducto,
     crearProducto,
