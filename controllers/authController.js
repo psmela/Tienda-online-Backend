@@ -18,8 +18,7 @@ const register = async (req, res)=>{
      res.cookie("token", token)
      res.status(201).json({message: "usuario creado"})
     } catch (error) {
-        res.status(500).send(error)
-        console.log(error.message);
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -41,8 +40,7 @@ const login = async (req, res)=>{
         email: findUser.email,
      })
     } catch (error) {
-        res.status(500).send(error)
-        console.log(error.message);
+        res.status(500).json({ message: error.message });
     }
 }
 
