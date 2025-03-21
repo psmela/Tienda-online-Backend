@@ -1,5 +1,6 @@
 const User = require('../models/user.js')
 const bcrypt = require('bcryptjs')
+const {loginSchema} = require('../schemas/auth.schema.js')
 const CreateAccesToken = require('../libs/jwt.js')
 
 const register = async (req, res)=>{ 
@@ -26,7 +27,8 @@ const register = async (req, res)=>{
 }
 
 const login = async (req, res)=>{
-    const {email, password} = req.body
+    const parsedData = loginSchema.parse(req.body);
+    const {email, password} = parsedData
     try {
         const findUser = await User.findOne({email})
         if(!findUser){
