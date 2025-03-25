@@ -1,6 +1,8 @@
 const User = require('../models/user.js')
 const bcrypt = require('bcryptjs')
 const {loginSchema} = require('../schemas/auth.schema.js')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 const CreateAccesToken = require('../libs/jwt.js')
 
 const register = async (req, res)=>{ 
@@ -66,4 +68,19 @@ const getProfile = async (req, res)=>{
 
 }
 
-module.exports = {register, login, logout, getProfile}
+const verifyToken = async (req, res) =>{
+    const {token} = req.cookies
+    if(!token) return res.status(401).json({message: "no autorizado"})
+    jwt.verify(token, process.env.TOKEN_SECRET, async (err, user)=>{
+       if (err) return res.status(401).json({message: "no autorizado"})
+       const userFound = User.findById(user.id) 
+       if(!userFound) return res.status(401).json({message: "no autorizado"})
+       res.json({
+       id: userFound._id,
+       userName: userFound.userName,
+       email: userFound.email
+
+       })
+    })
+}
+module.exports = {register, login, logout, getProfile, verifyToken}
