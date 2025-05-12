@@ -1,4 +1,5 @@
-const Producto = require('../models/producto'); 
+const Producto = require('../models/producto.js'); 
+const User = require('../models/user.js')
 const fs = require('fs');
 const cloudinary = require('../middlewares/cloudinary.js');
 const { log } = require('console');
@@ -117,7 +118,11 @@ const eliminarProducto = async (req, res) => {
           console.error(`Error al eliminar imagen con ID ${publicId}:`, error.message);
         }
       }
-    }
+    }   
+    await User.updateMany(
+        { "carrito.product": id },
+        { $pull: { carrito: { product: id } } }
+    );
         await productoEliminado.deleteOne()
         console.log("producto eliminado");
         res.status(200).json({ message: "Producto eliminado", producto: productoEliminado }); // Respuesta exitosa

@@ -7,3 +7,4 @@ node_modules/
 # Ignorar la carpeta de imágenes (Cloudinary)
 /uploads
 
+borrador.txt

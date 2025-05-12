@@ -20,10 +20,6 @@ const ProductoSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    carrito: {
-        type: Boolean,
-        default: false
-    },
     imagenes: [{
         type: String, // Array para almacenar múltiples URLs de imágenes
     }]

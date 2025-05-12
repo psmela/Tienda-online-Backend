@@ -1,9 +1,22 @@
 const User = require('../models/user.js')
+const Producto = require('../models/producto.js')
 const bcrypt = require('bcryptjs')
 const {loginSchema} = require('../schemas/auth.schema.js')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const CreateAccesToken = require('../libs/jwt.js')
+
+
+
+const getUsers = async (req, res) =>{
+    try {
+       const Users = await User.find() 
+       res.status(200).json(Users)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({message: error.message})
+    }
+}
 
 const register = async (req, res)=>{ 
     const {userName, email, password} = req.body
@@ -83,4 +96,78 @@ const verifyToken = async (req, res) =>{
        })
     })
 }
-module.exports = {register, login, logout, getProfile, verifyToken}
+
+    //añadir al carrito
+    const addProduct = async (req, res) =>{
+        const { userId } = req.params
+        const { productoId } = req.body
+        try {
+            
+            const usuario = await User.findById(userId);
+            if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+            const producto = await Producto.findById(productoId);
+            if (!producto) return res.status(404).json({ mensaje: 'Producto no encontrado' });
+
+            const itemExistente = usuario.carrito.find(item =>
+                item.product.toString === productoId
+            );
+
+            if(!itemExistente){
+              usuario.carrito.push({ product: productoId});
+            }
+
+            await usuario.save()
+            res.status(201).json({ mensaje: 'Producto agregado al carrito', carrito: usuario.carrito })
+
+        } catch (error) {
+            console.error(error)
+            res.status(500).json({mensaje: error.message})
+            
+        }
+
+    }
+
+    const getProducts = async (req, res) => {
+        const { userId } = req.params;
+      
+        try {
+          const usuario = await User.findById(userId).populate("carrito.product");
+      
+          if (!usuario) {
+            return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+          }
+      
+          const productosEnCarrito = usuario.carrito.map(item => item.product);
+      
+          res.status(200).json(productosEnCarrito);
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: error.message });
+        }
+      };
+
+      const removeProduct = async (req, res) =>{
+         const { userId } = req.params;
+         const { productoId } = req.body;
+
+        try {
+          const usuario = await User.findById(userId);
+          if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+
+        // Eliminar el producto del carrito
+        usuario.carrito = usuario.carrito.filter(item => 
+            item.product.toString() !== productoId
+        );
+
+        await usuario.save();
+
+        res.status(200).json({ mensaje: 'Producto eliminado del carrito', carrito: usuario.carrito });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: error.message });
+    }
+
+    }
+
+module.exports = {register, login, logout, getProfile, getUsers, verifyToken, addProduct, getProducts,removeProduct }
