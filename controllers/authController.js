@@ -86,7 +86,7 @@ const verifyToken = async (req, res) =>{
     if(!token) return res.status(401).json({message: "no autorizado"})
     jwt.verify(token, process.env.TOKEN_SECRET, async (err, user)=>{
        if (err) return res.status(401).json({message: "no autorizado"})
-       const userFound = User.findById(user.id) 
+       const userFound = await User.findById(user.id); 
        if(!userFound) return res.status(401).json({message: "no autorizado"})
        res.json({
        id: userFound._id,
