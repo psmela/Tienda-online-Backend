@@ -58,6 +58,7 @@ const login = async (req, res)=>{
         id: findUser._id,
         userName: findUser.userName,
         email: findUser.email,
+        carrito: findUser.carrito
      })
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -75,7 +76,8 @@ const getProfile = async (req, res)=>{
  res.json({
   id: FoundUser._id,
   userName: FoundUser.userName,
-  email: FoundUser.email
+  email: FoundUser.email,
+  carrito: FoundUser.carrito
 
 })
 
@@ -91,7 +93,8 @@ const verifyToken = async (req, res) =>{
        res.json({
        id: userFound._id,
        userName: userFound.userName,
-       email: userFound.email
+       email: userFound.email,
+       carrito: userFound.carrito
 
        })
     })
